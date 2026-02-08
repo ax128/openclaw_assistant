@@ -1,0 +1,32 @@
+# Claw Assistant（claw_assistant）项目依赖
+# 
+# 安装方法：
+# pip install -r requirements.txt
+#
+# 注意：
+# - tkinter 是 Python 标准库，通常已包含在 Python 安装中
+#   Windows/Linux: 通常已包含
+#   macOS: 需要安装 Python 3.x（tkinter 已包含）
+#
+# 图像处理
+Pillow>=10.0.0
+
+# PyQt5 助手展示（用于 main.py）
+PyQt5>=5.15.0
+
+# AI功能（HTTP请求）
+requests>=2.31.0
+
+# Gateway WebSocket 与 SSH 隧道
+websockets>=12.0
+paramiko>=3.0.0
+
+# 配置敏感项加密（gateway.json 中 token/password）
+cryptography>=41.0.0
+
+# 语音合成与播放（气泡框同步朗读，可选）
+# edge-tts：Microsoft 在线神经语音，轻量、音质自然，支持多语言
+# https://github.com/microsoft/edge-tts
+edge-tts>=6.1.0
+playsound>=1.3.0
+mutagen>=1.47.0

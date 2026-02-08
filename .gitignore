@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# 配置文件（包含敏感信息）
+config/settings.json
+# Gateway 连接配置（含 token/password，勿提交）
+config/gateway.json
+# Gateway 加密密钥（勿提交）
+config/.gateway_key
+# 用户本地配置（可选忽略，避免提交个人偏好）
+config/system_settings.json
+config/ui_settings.json
+
+# 日志文件（logs 文件夹及其内容均忽略）
+logs/
+tests/test.log
+
+# 运行时/用户状态（勿提交）
+assistants/current.json
+assistants/next_bot_seq.json
+# 根目录或脚本目录下的 token 文件（client 会读取，敏感）
+gateway_token.txt
+.gateway_token
+
+# 环境变量（若使用 .env 存本地配置）
+.env
+.env.local
+.env.*.local
+
+# 遗留目录（从 pets 迁移到 assistants 后，本地可能仍有 pets）
+pets/
+
+# 打包/构建产物
+build/
+dist/
+*.egg-info/
+*.egg
+
+# 测试与覆盖率（可选）
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 测试/临时文件
+utils/test.md
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db

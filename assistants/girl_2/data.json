@@ -1,0 +1,70 @@
+{
+  "name": "jan",
+  "level": 1,
+  "experience": 0,
+  "state": "walking",
+  "position": {
+    "x": 1843,
+    "y": 710
+  },
+  "interaction_history": [],
+  "created_at": "2026-02-06T15:34:09.716091",
+  "last_active": "2026-02-08T15:36:05.746450",
+  "state_to_sprite_folder": {
+    "idle": "idle",
+    "walking": "walk",
+    "dragging": "drag",
+    "paused": "paused",
+    "happy": "happy",
+    "sad": "sad",
+    "thinking": "think"
+  },
+  "bot_id": "bot00003",
+  "config": {
+    "wander_enabled": true,
+    "wander_boundary": {
+      "x": 0,
+      "y": 0,
+      "width": 1920,
+      "height": 1080
+    },
+    "wander_speed": 1,
+    "speed_level": 1,
+    "pet_size": 3,
+    "personality": "一个可爱的小女孩",
+    "default_position": {
+      "x": 100,
+      "y": 100
+    },
+    "description": "一个可爱的小女孩",
+    "move_interval": 2.0,
+    "anim_interval_ms": 100,
+    "pause_resume_delay": 10.0,
+    "update_interval_ms": 50,
+    "anim_frame_delays_ms": {
+      "idle": 1000,
+      "walking": 500,
+      "dragging": 300,
+      "paused": 1000,
+      "happy": 500,
+      "sad": 500,
+      "thinking": 500
+    },
+    "voice_enabled": false,
+    "voice_id": "zh-CN-XiaoxiaoNeural",
+    "bubble_enabled": true,
+    "timings": {
+      "bubble_show_throttle_sec": 0.4,
+      "bubble_duration_ms": 15000,
+      "bubble_duration_with_voice_max_ms": 120000,
+      "bubble_close_after_voice_ms": 3000,
+      "bubble_hide_to_walk_ms": 20000,
+      "state_hold_sec": 30,
+      "happy_after_action_sec": 60,
+      "forced_state_duration_sec": 3600,
+      "position_flush_interval_sec": 2.0,
+      "chat_reply_poll_ms": 200,
+      "chat_max_display_messages": 200
+    }
+  }
+}

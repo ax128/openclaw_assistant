@@ -1,0 +1,18 @@
+{
+  "bash_script_helper": {
+    "name": "Bash Script Helper",
+    "description": "Bash Script Helper - Auto-activating skill for DevOps Basics.\n  Triggers on: bash script helper, bash script helper\n  Part of the DevOps Basics skill category.",
+    "call_method": "bash_script_helper",
+    "enabled": true,
+    "prompt": "【任务】【目的】This skill provides automated assistance for bash script helper tasks within the DevOps Basics domain.\n【适用场景】This skill activates automatically when you:\n- Mention \"bash script helper\" in your request\n- Ask about bash script helper patterns or best practices\n- Need help with foundational devops skills covering version control, containerization, basic ci/cd, and infrastructure fundamentals.\n【能力】- Provides step-by-step guidance for bash script helper\n- Follows industry best practices and patterns\n- Generates production-ready code and configurations\n- Validates outputs against common standards\n【要求】语气友好、简洁，直接输出回复内容，50–200 字；不要重复用户问题或加「好的」等前缀。",
+    "keywords": [
+      "Help me with bash script helper",
+      "Set up bash script helper",
+      "How do I implement bash script helper?"
+    ],
+    "call_function": false,
+    "function_name": "",
+    "function_params": {},
+    "return_result": null
+  }
+}

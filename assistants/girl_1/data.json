@@ -1,0 +1,79 @@
+{
+  "name": "小美",
+  "level": 1,
+  "experience": 0,
+  "state": "happy",
+  "position": {
+    "x": 1930,
+    "y": 747
+  },
+  "interaction_history": [],
+  "created_at": "",
+  "last_active": "2026-02-08T15:11:25.604217",
+  "state_to_sprite_folder": {
+    "idle": "idle",
+    "walking": "walk",
+    "dragging": "drag",
+    "paused": "paused",
+    "happy": "happy",
+    "sad": "sad",
+    "thinking": "think"
+  },
+  "bot_id": "bot00002",
+  "config": {
+    "wander_enabled": false,
+    "wander_boundary": {
+      "x": 0,
+      "y": 0,
+      "width": 1920,
+      "height": 1080
+    },
+    "wander_speed": 0,
+    "speed_level": 0,
+    "pet_size": 3,
+    "personality": "一个可爱的小女孩，喜欢探索和聊天，对新技术充满好奇",
+    "default_position": {
+      "x": 100,
+      "y": 100
+    },
+    "description": "一个可爱的小女孩，喜欢探索和聊天，对新技术充满好奇",
+    "move_interval": 2.0,
+    "anim_interval_ms": 100,
+    "pause_resume_delay": 10.0,
+    "update_interval_ms": 50,
+    "anim_frame_delays_ms": {
+      "idle": 160,
+      "walking": 160,
+      "dragging": 160,
+      "paused": 160,
+      "happy": 160,
+      "sad": 160,
+      "thinking": 160
+    },
+    "valid_states": [
+      "idle",
+      "walking",
+      "happy",
+      "sad",
+      "thinking",
+      "paused",
+      "dragging"
+    ],
+    "voice_enabled": true,
+    "voice_id": "zh-CN-XiaoxiaoNeural",
+    "timings": {
+      "bubble_show_throttle_sec": 0.4,
+      "bubble_duration_ms": 15000,
+      "bubble_duration_with_voice_max_ms": 120000,
+      "bubble_close_after_voice_ms": 3000,
+      "bubble_hide_to_walk_ms": 20000,
+      "state_hold_sec": 30,
+      "happy_after_action_sec": 60,
+      "forced_state_duration_sec": 3600,
+      "position_flush_interval_sec": 2.0,
+      "chat_reply_poll_ms": 200,
+      "chat_max_display_messages": 200
+    },
+    "bubble_enabled": true
+  }
+}
