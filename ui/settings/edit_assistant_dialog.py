@@ -49,7 +49,7 @@ class EditAssistantDialog(QDialog):
         self.assistants_dir = os.path.normpath(assistants_dir)
         self._state_files = {}
         self._current_folder = None
-        self.setWindowTitle(t("edit_pet_title"))
+        self.setWindowTitle(t("edit_assistant_title"))
         self.setAttribute(Qt.WA_DeleteOnClose, False)
         ff, fs, bg = ui_font_family(), ui_font_size_body(), ui_window_bg()
         self.setStyleSheet(f"""
@@ -68,37 +68,37 @@ class EditAssistantDialog(QDialog):
         layout.setSpacing(12)
 
         form = QFormLayout()
-        self.pet_combo = QComboBox()
-        self.pet_combo.setMinimumWidth(200)
+        self.assistant_combo = QComboBox()
+        self.assistant_combo.setMinimumWidth(200)
         folders = _list_assistant_folders(self.assistants_dir)
         for f in folders:
-            self.pet_combo.addItem(f, f)
-        self.pet_combo.currentIndexChanged.connect(self._on_pet_selected)
-        form.addRow(t("edit_pet_select_label"), self.pet_combo)
+            self.assistant_combo.addItem(f, f)
+        self.assistant_combo.currentIndexChanged.connect(self._on_assistant_selected)
+        form.addRow(t("edit_assistant_select_label"), self.assistant_combo)
 
         self.folder_label = QLabel("")
         self.folder_label.setStyleSheet("color: #6b7280;")
-        form.addRow(t("edit_pet_folder_readonly"), self.folder_label)
+        form.addRow(t("edit_assistant_folder_readonly"), self.folder_label)
 
         self.name_edit = QLineEdit()
-        self.name_edit.setPlaceholderText(t("add_pet_name_placeholder"))
-        self.name_edit.setToolTip(t("add_pet_folder_tooltip"))
-        form.addRow(t("add_pet_name_label"), self.name_edit)
+        self.name_edit.setPlaceholderText(t("add_assistant_name_placeholder"))
+        self.name_edit.setToolTip(t("add_assistant_folder_tooltip"))
+        form.addRow(t("add_assistant_name_label"), self.name_edit)
 
         self.bot_id_label = QLabel("")
         self.bot_id_label.setStyleSheet("color: #6b7280;")
-        form.addRow(t("add_pet_bot_id_label"), self.bot_id_label)
+        form.addRow(t("add_assistant_bot_id_label"), self.bot_id_label)
 
         self.desc_edit = QTextEdit()
-        self.desc_edit.setPlaceholderText(t("add_pet_description_placeholder"))
+        self.desc_edit.setPlaceholderText(t("add_assistant_description_placeholder"))
         self.desc_edit.setMaximumHeight(80)
-        form.addRow(t("add_pet_description_label"), self.desc_edit)
+        form.addRow(t("add_assistant_description_label"), self.desc_edit)
 
         layout.addLayout(form)
 
-        g_sprites = QGroupBox(t("add_pet_sprites_card"))
+        g_sprites = QGroupBox(t("add_assistant_sprites_card"))
         sprites_layout = QVBoxLayout(g_sprites)
-        hint = QLabel(t("add_pet_sprites_hint"))
+        hint = QLabel(t("add_assistant_sprites_hint"))
         hint.setStyleSheet("color: #6b7280; font-size: 12px;")
         hint.setWordWrap(True)
         sprites_layout.addWidget(hint)
@@ -111,12 +111,12 @@ class EditAssistantDialog(QDialog):
             lbl = QLabel(t(i18n_key) + " (" + folder_name + "):")
             lbl.setMinimumWidth(120)
             row.addWidget(lbl)
-            btn = QPushButton(t("add_pet_select_images"))
+            btn = QPushButton(t("add_assistant_select_images"))
             btn.setStyleSheet(_secondary_btn())
             btn.setCursor(Qt.PointingHandCursor)
             btn.clicked.connect(lambda checked=False, s=state_key: self._on_select_sprites(s))
             row.addWidget(btn)
-            count_lbl = QLabel(t("add_pet_selected_fmt") % 0)
+            count_lbl = QLabel(t("add_assistant_selected_fmt") % 0)
             count_lbl.setStyleSheet("color: #6b7280;")
             row.addWidget(count_lbl)
             row.addStretch()
@@ -128,7 +128,7 @@ class EditAssistantDialog(QDialog):
         layout.addWidget(g_sprites)
 
         btns = QHBoxLayout()
-        self.delete_btn = QPushButton(t("edit_pet_delete"))
+        self.delete_btn = QPushButton(t("edit_assistant_delete"))
         self.delete_btn.setStyleSheet("QPushButton { background: #dc2626; color: white; border: none; border-radius: 8px; padding: 10px 16px; } QPushButton:hover { background: #b91c1c; }")
         self.delete_btn.setCursor(Qt.PointingHandCursor)
         self.delete_btn.clicked.connect(self._on_delete)
@@ -138,7 +138,7 @@ class EditAssistantDialog(QDialog):
         cancel_btn.setStyleSheet(_secondary_btn())
         cancel_btn.setCursor(Qt.PointingHandCursor)
         cancel_btn.clicked.connect(self.reject)
-        self.save_btn = QPushButton(t("edit_pet_save"))
+        self.save_btn = QPushButton(t("edit_assistant_save"))
         self.save_btn.setStyleSheet(_primary_btn())
         self.save_btn.setCursor(Qt.PointingHandCursor)
         self.save_btn.clicked.connect(self._on_save)
@@ -146,20 +146,20 @@ class EditAssistantDialog(QDialog):
         btns.addWidget(self.save_btn)
         layout.addLayout(btns)
 
-        if self.pet_combo.count() > 0:
-            self.pet_combo.setCurrentIndex(0)
-            self._on_pet_selected()
+        if self.assistant_combo.count() > 0:
+            self.assistant_combo.setCurrentIndex(0)
+            self._on_assistant_selected()
         else:
             self.folder_label.setText("")
             self.save_btn.setEnabled(False)
             self.delete_btn.setEnabled(False)
 
-    def _on_pet_selected(self):
-        idx = self.pet_combo.currentIndex()
+    def _on_assistant_selected(self):
+        idx = self.assistant_combo.currentIndex()
         if idx < 0:
             self._current_folder = None
             return
-        self._current_folder = self.pet_combo.currentData()
+        self._current_folder = self.assistant_combo.currentData()
         if not self._current_folder:
             return
         data_path = os.path.join(self.assistants_dir, self._current_folder, "data.json")
@@ -178,12 +178,12 @@ class EditAssistantDialog(QDialog):
         self.desc_edit.setPlainText((cfg.get("description") or data.get("description") or "").strip())
         for state_key in self._state_files:
             self._state_files[state_key] = []
-            self._sprite_labels[state_key].setText(t("add_pet_selected_fmt") % 0)
+            self._sprite_labels[state_key].setText(t("add_assistant_selected_fmt") % 0)
 
     def _on_select_sprites(self, state_key: str):
         paths, _ = QFileDialog.getOpenFileNames(
             self,
-            t("add_pet_select_images") + " - " + DEFAULT_STATE_TO_SPRITE_FOLDER.get(state_key, state_key),
+            t("add_assistant_select_images") + " - " + DEFAULT_STATE_TO_SPRITE_FOLDER.get(state_key, state_key),
             "",
             "PNG (*.png)",
         )
@@ -200,19 +200,19 @@ class EditAssistantDialog(QDialog):
             numbers.append((num, p))
         numbers.sort(key=lambda x: x[0])
         self._state_files[state_key] = [(p, "%d.png" % n) for n, p in numbers]
-        self._sprite_labels[state_key].setText(t("add_pet_selected_fmt") % len(self._state_files[state_key]))
+        self._sprite_labels[state_key].setText(t("add_assistant_selected_fmt") % len(self._state_files[state_key]))
 
     def _validate_form(self) -> str:
         name = (self.name_edit.text() or "").strip()
         if not name:
-            return t("add_pet_validation_name_empty")
+            return t("add_assistant_validation_name_empty")
         if not _validate_english_first_no_chinese(name):
-            return t("add_pet_validation_name_no_chinese")
+            return t("add_assistant_validation_name_no_chinese")
         return ""
 
     def _on_save(self):
         if not self._current_folder:
-            QMessageBox.warning(self, t("tip_title"), t("edit_pet_no_pet"))
+            QMessageBox.warning(self, t("tip_title"), t("edit_assistant_no_assistant"))
             return
         err = self._validate_form()
         if err:
@@ -246,7 +246,7 @@ class EditAssistantDialog(QDialog):
                     if existing:
                         overwrite_folders.append(folder_name)
             if overwrite_folders:
-                msg = t("edit_pet_overwrite_confirm") % "、".join(overwrite_folders)
+                msg = t("edit_assistant_overwrite_confirm") % "、".join(overwrite_folders)
                 if QMessageBox.question(
                     self, t("tip_title"), msg,
                     QMessageBox.Yes | QMessageBox.No,
@@ -274,20 +274,20 @@ class EditAssistantDialog(QDialog):
                     except (OSError, AttributeError):
                         pass
             logger.info(f"编辑助手成功: {self._current_folder}")
-            QMessageBox.information(self, t("done_title"), t("edit_pet_saved"))
+            QMessageBox.information(self, t("done_title"), t("edit_assistant_saved"))
             self.accept()
         except Exception as e:
             logger.exception(f"编辑助手失败: {e}")
-            QMessageBox.warning(self, t("add_pet_failed"), str(e))
+            QMessageBox.warning(self, t("add_assistant_failed"), str(e))
 
     def _on_delete(self):
         if not self._current_folder:
-            QMessageBox.warning(self, t("tip_title"), t("edit_pet_no_pet"))
+            QMessageBox.warning(self, t("tip_title"), t("edit_assistant_no_assistant"))
             return
         ok = QMessageBox.question(
             self,
             t("tip_title"),
-            t("edit_pet_delete_confirm"),
+            t("edit_assistant_delete_confirm"),
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
         )
@@ -297,8 +297,8 @@ class EditAssistantDialog(QDialog):
         try:
             shutil.rmtree(assistant_root)
             logger.info(f"已删除助手: {self._current_folder}")
-            QMessageBox.information(self, t("done_title"), t("edit_pet_deleted"))
+            QMessageBox.information(self, t("done_title"), t("edit_assistant_deleted"))
             self.accept()
         except Exception as e:
             logger.exception(f"删除助手失败: {e}")
-            QMessageBox.warning(self, t("add_pet_failed"), str(e))
+            QMessageBox.warning(self, t("add_assistant_failed"), str(e))

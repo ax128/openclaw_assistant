@@ -120,22 +120,22 @@ class AssistantWindow(QWidget):
         # 状态机：任何状态切换至少保持 30 秒；30 秒无操作或默认 1 分钟后切 walk
         self._state_hold_until = 0.0     # 状态最少保持到此时间戳
         self._last_user_action_ts = time.time()  # 最后一次用户操作；启动时视为“刚操作”，默认 happy 1 分钟
-        self._last_applied_state = None  # 已写入 pet 的状态，仅当变化时写盘
+        self._last_applied_state = None  # 已写入助手的状态，仅当变化时写盘
         self._drag_position_flush_ts = 0.0  # 拖拽时上次写位置的时刻，用于节流（约 100ms）
 
         _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        pet = assistant_manager.get_current_assistant()
-        if not pet:
+        assistant = assistant_manager.get_current_assistant()
+        if not assistant:
             raise RuntimeError("无当前助手，无法初始化 AssistantWindow")
-        pet_config = assistant_manager.get_current_assistant_config()
-        if pet_config:
-            size_level = pet_config.get_pet_size()
+        assistant_config = assistant_manager.get_current_assistant_config()
+        if assistant_config:
+            size_level = assistant_config.get_assistant_size()
             size_map = {1: (100, 100), 2: (150, 150), 3: (200, 200)}
             self._display_size = size_map.get(size_level, (150, 150))
-            self.pause_resume_delay = pet_config.get_pause_resume_delay()
-        if not pet_config:
+            self.pause_resume_delay = assistant_config.get_pause_resume_delay()
+        if not assistant_config:
             self.pause_resume_delay = 10.0
-        sprites_path = os.path.join(_root, assistant_manager.assistants_dir, pet.assistant_name, "assets", "sprites")
+        sprites_path = os.path.join(_root, assistant_manager.assistants_dir, assistant.assistant_name, "assets", "sprites")
         self._sprites_path = sprites_path if os.path.isdir(sprites_path) else None
         self._load_all_frames()
 
@@ -171,22 +171,22 @@ class AssistantWindow(QWidget):
                 logger.debug(f"主屏定位失败: {e}")
                 x, y = self._clamp_position_to_screen(100, 100)
         else:
-            pos = pet.get_position() if pet else {"x": 100, "y": 100}
+            pos = assistant.get_position() if assistant else {"x": 100, "y": 100}
             x, y = self._clamp_position_to_screen(pos.get("x", 100), pos.get("y", 100))
         self.move(x, y)
-        if pet:
+        if assistant:
             if need_reposition:
-                pet.set_position(x, y)
+                assistant.set_position(x, y)
             else:
-                pos = pet.get_position()
+                pos = assistant.get_position()
                 if x != pos.get("x", 100) or y != pos.get("y", 100):
-                    pet.set_position(x, y)
+                    assistant.set_position(x, y)
         self.label.setGeometry(0, 0, self._display_size[0], self._display_size[1])
 
         # 动画定时器（间隔按当前动作从 data.config.anim_frame_delays_ms 读取，缺省用 anim_interval_ms）
         self._anim_timer = QTimer(self)
         self._anim_timer.timeout.connect(self._next_frame)
-        anim_ms = pet_config.get_anim_interval_ms_for_state(self._current_state) if pet_config else 100
+        anim_ms = assistant_config.get_anim_interval_ms_for_state(self._current_state) if assistant_config else 100
         self._anim_timer.start(anim_ms)
 
         # 主更新循环（移动、状态、位置同步）
@@ -207,8 +207,8 @@ class AssistantWindow(QWidget):
 
     def _load_all_frames(self):
         """加载各状态精灵帧；仅记录实际有图的状态为可用，不将空状态用其他状态图替代。"""
-        pet = self.assistant_manager.get_current_assistant()
-        mapping = pet.data.get("state_to_sprite_folder", DEFAULT_STATE_TO_SPRITE_FOLDER) if pet else DEFAULT_STATE_TO_SPRITE_FOLDER
+        assistant = self.assistant_manager.get_current_assistant()
+        mapping = assistant.data.get("state_to_sprite_folder", DEFAULT_STATE_TO_SPRITE_FOLDER) if assistant else DEFAULT_STATE_TO_SPRITE_FOLDER
         states = ["idle", "walking", "dragging", "happy", "sad", "thinking", "paused"]
         for s in states:
             self._state_frames[s] = load_frames(self._sprites_path, s, self._display_size, state_to_folder=mapping)
@@ -268,10 +268,10 @@ class AssistantWindow(QWidget):
             x2, y2 = self._clamp_position_to_screen(x, y, w, h)
             if (x2, y2) != (x, y):
                 self.move(x2, y2)
-                pet = self.assistant_manager.get_current_assistant()
-                if pet:
-                    pet.set_position(x2, y2)
-                    pet.save()
+                assistant = self.assistant_manager.get_current_assistant()
+                if assistant:
+                    assistant.set_position(x2, y2)
+                    assistant.save()
                 logger.debug(f"Mac 校正助手窗口位置: ({x},{y}) -> ({x2},{y2})")
         except Exception as e:
             logger.debug(f"Mac 校正助手位置失败: {e}")
@@ -303,11 +303,11 @@ class AssistantWindow(QWidget):
         self._apply_frame()
 
     def _setup_movement(self):
-        pet = self.assistant_manager.get_current_assistant()
-        pet_config = self.assistant_manager.get_current_assistant_config()
-        if pet and pet_config:
-            self.movement_controller = MovementController(pet, pet_config)
-            self.last_speed_level = pet_config.get_speed_level()
+        assistant = self.assistant_manager.get_current_assistant()
+        assistant_config = self.assistant_manager.get_current_assistant_config()
+        if assistant and assistant_config:
+            self.movement_controller = MovementController(assistant, assistant_config)
+            self.last_speed_level = assistant_config.get_speed_level()
             if self.last_speed_level is None:
                 self.last_speed_level = 1
             self.movement_controller.start()
@@ -333,7 +333,7 @@ class AssistantWindow(QWidget):
         self._state_hold_until = t + state_hold_sec
 
     def _apply_state_target(self, target, apply_anim=True):
-        """统一状态切换入口：更新 _current_state、hold、动画；仅在状态变化时写 pet.set('state')。仅支持有精灵图的状态。"""
+        """统一状态切换入口：更新 _current_state、hold、动画；仅在状态变化时写 assistant.set('state')。仅支持有精灵图的状态。"""
         avail = getattr(self, "_available_states", set())
         if target not in avail:
             target = self._fallback_state()
@@ -351,14 +351,14 @@ class AssistantWindow(QWidget):
                 self._anim_timer.setInterval(ms)
         if apply_anim:
             self._apply_frame()
-        pet = self.assistant_manager.get_current_assistant()
-        if pet and target != self._last_applied_state:
-            pet.set("state", target)
+        assistant = self.assistant_manager.get_current_assistant()
+        if assistant and target != self._last_applied_state:
+            assistant.set("state", target)
             self._last_applied_state = target
 
     def _update_loop(self):
         t = time.time()
-        pet = self.assistant_manager.get_current_assistant()
+        assistant = self.assistant_manager.get_current_assistant()
         # 解除交互暂停
         if self.is_paused_by_interaction and (t - self.last_interaction_time) >= self.pause_resume_delay:
             self.is_paused_by_interaction = False
@@ -408,20 +408,20 @@ class AssistantWindow(QWidget):
         if not self.is_dragging:
             if self.movement_controller:
                 self.movement_controller.update()
-            if pet:
-                pos = pet.get_position()
+            if assistant:
+                pos = assistant.get_position()
                 x, y = pos.get("x", self.x()), pos.get("y", self.y())
                 if self.x() != x or self.y() != y:
                     self.move(x, y)
         if self.speech_bubble and getattr(self.speech_bubble, "is_showing", False):
             self.speech_bubble.update_position()
         flush_interval = float(cfg.get_timing("position_flush_interval_sec", 2.0)) if cfg else 2.0
-        if pet and (t - self._last_position_flush) >= flush_interval:
+        if assistant and (t - self._last_position_flush) >= flush_interval:
             self._last_position_flush = t
-            if callable(getattr(pet, "flush_if_dirty", None)):
-                pet.flush_if_dirty()
-            if callable(getattr(pet, "flush_state_if_dirty", None)):
-                pet.flush_state_if_dirty(flush_interval)
+            if callable(getattr(assistant, "flush_if_dirty", None)):
+                assistant.flush_if_dirty()
+            if callable(getattr(assistant, "flush_state_if_dirty", None)):
+                assistant.flush_state_if_dirty(flush_interval)
 
     def pause_movement(self):
         if self.movement_controller and self.movement_controller.enabled:
@@ -462,9 +462,9 @@ class AssistantWindow(QWidget):
     def open_chat(self):
         self.pause_movement()
         from ui.session_list_window import SessionListWindow
-        pet = self.assistant_manager.get_current_assistant()
+        assistant = self.assistant_manager.get_current_assistant()
         cfg = self.assistant_manager.get_current_assistant_config()
-        name = (pet.get("name") or pet.assistant_name) if pet else t("pet_default_name")
+        name = (assistant.get("name") or assistant.assistant_name) if assistant else t("assistant_default_name")
         personality = cfg.get("personality", "") if cfg else ""
         self._show_window("session_list_window", SessionListWindow, name, personality, self, self.gateway_client,
                           error_msg=t("error_open_failed"))
@@ -503,8 +503,8 @@ class AssistantWindow(QWidget):
 
     def open_clear_cache(self):
         from ui.settings.clear_cache_window import ClearCacheWindow
-        pet = self.assistant_manager.get_current_assistant()
-        bot_id = (pet.get("bot_id") or getattr(pet, "assistant_name", None) or "bot00001") if pet else "bot00001"
+        assistant = self.assistant_manager.get_current_assistant()
+        bot_id = (assistant.get("bot_id") or getattr(assistant, "assistant_name", None) or "bot00001") if assistant else "bot00001"
         def on_create(w):
             w.bot_id = bot_id
         self._show_window("clear_cache_window", ClearCacheWindow, bot_id, self,
@@ -756,7 +756,7 @@ class AssistantWindow(QWidget):
     def set_size(self, size):
         cfg = self.assistant_manager.get_current_assistant_config()
         if cfg:
-            cfg.set_pet_size(size)
+            cfg.set_assistant_size(size)
         size_map = {1: (100, 100), 2: (150, 150), 3: (200, 200)}
         self._display_size = size_map.get(size, (150, 150))
         self._load_all_frames()
@@ -764,15 +764,15 @@ class AssistantWindow(QWidget):
         self.label.setGeometry(0, 0, self._display_size[0], self._display_size[1])
         self._apply_frame()
 
-    def _switch_robot(self, pet_id):
-        """切换机器人并重载窗口状态；同步将当前助手的 bot_id 写入 assistants/current.json"""
-        if pet_id == self.assistant_manager.current_assistant_name:
+    def _switch_assistant(self, assistant_id):
+        """切换助手并重载窗口状态；同步将当前助手的 bot_id 写入 assistants/current.json"""
+        if assistant_id == self.assistant_manager.current_assistant_name:
             return
-        if not self.assistant_manager.switch_assistant(pet_id):
+        if not self.assistant_manager.switch_assistant(assistant_id):
             return
         if self.settings is not None:
-            pet = self.assistant_manager.get_current_assistant()
-            bot_id = pet.get("bot_id", "bot00001") if pet else "bot00001"
+            assistant = self.assistant_manager.get_current_assistant()
+            bot_id = assistant.get("bot_id", "bot00001") if assistant else "bot00001"
             self.settings.set("current_assistant", bot_id)
             self.settings.load()
             self.settings.save()
@@ -789,28 +789,28 @@ class AssistantWindow(QWidget):
         if self.movement_controller:
             self.movement_controller.stop()
         self.movement_controller = None
-        pet = self.assistant_manager.get_current_assistant()
-        if not pet:
+        assistant = self.assistant_manager.get_current_assistant()
+        if not assistant:
             return
-        pet_config = self.assistant_manager.get_current_assistant_config()
+        assistant_config = self.assistant_manager.get_current_assistant_config()
         _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        if pet_config:
+        if assistant_config:
             size_map = {1: (100, 100), 2: (150, 150), 3: (200, 200)}
-            self._display_size = size_map.get(pet_config.get_pet_size(), (150, 150))
-        sprites_path = os.path.join(_root, self.assistant_manager.assistants_dir, pet.assistant_name, "assets", "sprites")
+            self._display_size = size_map.get(assistant_config.get_assistant_size(), (150, 150))
+        sprites_path = os.path.join(_root, self.assistant_manager.assistants_dir, assistant.assistant_name, "assets", "sprites")
         self._sprites_path = sprites_path if os.path.isdir(sprites_path) else None
         self._load_all_frames()
-        pos = pet.get_position()
+        pos = assistant.get_position()
         self.setFixedSize(self._display_size[0], self._display_size[1])
         x, y = self._clamp_position_to_screen(pos.get("x", 100), pos.get("y", 100))
         self.move(x, y)
         if x != pos.get("x", 100) or y != pos.get("y", 100):
-            pet.set_position(x, y)
+            assistant.set_position(x, y)
         self.label.setGeometry(0, 0, self._display_size[0], self._display_size[1])
         self._apply_frame()
         self._setup_movement()
-        self._last_applied_state = None  # 切换助手后下一帧由状态机同步 state 到新 pet
-        logger.info(f"已切换机器人并重载: {pet.assistant_name}")
+        self._last_applied_state = None  # 切换助手后下一帧由状态机同步 state
+        logger.info(f"已切换助手并重载: {assistant.assistant_name}")
 
     def _restart_app(self):
         """重启应用：启动新进程后退出当前进程，实现全部重新加载。Gateway 会断开，新进程会显示连接窗口。"""
@@ -833,12 +833,12 @@ class AssistantWindow(QWidget):
             self.speech_bubble._do_hide()
         if self.movement_controller:
             self.movement_controller.stop()
-        pet = self.assistant_manager.get_current_assistant()
-        if pet:
-            if callable(getattr(pet, "flush_if_dirty", None)):
-                pet.flush_if_dirty()
-            if callable(getattr(pet, "flush_state_if_dirty", None)):
-                pet.flush_state_if_dirty(0)
+        assistant = self.assistant_manager.get_current_assistant()
+        if assistant:
+            if callable(getattr(assistant, "flush_if_dirty", None)):
+                assistant.flush_if_dirty()
+            if callable(getattr(assistant, "flush_state_if_dirty", None)):
+                assistant.flush_state_if_dirty(0)
         if self.chat_window and getattr(self.chat_window, "isVisible", lambda: False)():
             self.chat_window.close()
         QApplication.quit()
@@ -866,7 +866,7 @@ class AssistantWindow(QWidget):
         menu.clear()
         cur_speed = self.last_speed_level if self.last_speed_level is not None else 1
         cfg = self.assistant_manager.get_current_assistant_config()
-        cur_size = cfg.get_pet_size() if cfg else 2
+        cur_size = cfg.get_assistant_size() if cfg else 2
         sm = menu.addMenu(t("speed_menu"))
         _speed_items = [(0, t("speed_0")), (1, t("speed_1")), (2, t("speed_2")), (3, t("speed_3"))]
         for i, lbl in _speed_items:
@@ -888,12 +888,12 @@ class AssistantWindow(QWidget):
                 stm.addAction(label, lambda checked=False, s=state_id: self.set_forced_state(s))
         stm.addSeparator()
         stm.addAction(t("cancel_force"), lambda: self.set_forced_state(None))
-        rm = menu.addMenu(t("select_robot_menu"))
+        rm = menu.addMenu(t("select_assistant_menu"))
         for pid in self.assistant_manager.list_assistants():
             pd = self.assistant_manager.assistants.get(pid)
             display_name = (pd.get("name") or pid) if pd else pid
             label = display_name + t("current_suffix") if pid == self.assistant_manager.current_assistant_name else display_name
-            rm.addAction(label, lambda checked=False, p=pid: self._switch_robot(p))
+            rm.addAction(label, lambda checked=False, p=pid: self._switch_assistant(p))
         menu.addSeparator()
         cur_loc = get_locale()
         lang_menu = menu.addMenu(t("language_label"))
@@ -953,12 +953,12 @@ class AssistantWindow(QWidget):
         if event.buttons() == Qt.LeftButton and self._drag_start is not None:
             self._did_drag = True  # 发生过移动，视为拖动，后续双击不打开聊天
             self.move(event.globalPos() - self._drag_start)
-            pet = self.assistant_manager.get_current_assistant()
-            if pet:
+            assistant = self.assistant_manager.get_current_assistant()
+            if assistant:
                 now = time.time()
                 if (now - self._drag_position_flush_ts) >= 0.1:  # 拖拽时位置写盘/内存节流约 100ms
                     self._drag_position_flush_ts = now
-                    pet.set_position(self.x(), self.y())
+                    assistant.set_position(self.x(), self.y())
             # 拖动时每次移动都更新气泡位置，保证跨屏时气泡跟到新屏幕
             if self.speech_bubble and getattr(self.speech_bubble, "is_showing", False):
                 self.speech_bubble.update_position()
@@ -971,9 +971,9 @@ class AssistantWindow(QWidget):
             if self.is_dragging:
                 self._drag_ended_ts = time.time()  # 松开后 3 秒再切 happy
             self.is_dragging = False
-            pet = self.assistant_manager.get_current_assistant()
-            if pet:
-                pet.set_position(self.x(), self.y())
+            assistant = self.assistant_manager.get_current_assistant()
+            if assistant:
+                assistant.set_position(self.x(), self.y())
             self.on_user_activity()
         event.accept()
 

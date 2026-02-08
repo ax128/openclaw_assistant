@@ -130,7 +130,7 @@ def _default_ui_settings() -> dict:
         },
         "speech_bubble": {
             "default_duration_ms": 15000,
-            "gap_above_pet_px": 2,
+            "gap_above_assistant_px": 2,
             "tail": {"width_px": 14, "height_px": 12},
             "border_px": 2,
             "radius_px": 8,

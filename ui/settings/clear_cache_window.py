@@ -12,7 +12,7 @@ from utils.platform_adapter import ui_font_family, ui_font_size_body, ui_window_
 
 
 def _logs_dir():
-    """项目 logs 目录（与 log_tail_window 一致：desktop_pet/logs）。"""
+    """项目 logs 目录（与 log_tail_window、utils/logger 一致：项目根下 logs）。"""
     return Path(__file__).resolve().parent.parent.parent / "logs"
 
 

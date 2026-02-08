@@ -38,7 +38,8 @@ def _gateway_log_dir():
 
 
 def _main_log_path():
-    return _main_log_dir() / ("pet_%s.log" % _today_str())
+    """主程序日志路径，与 utils/logger 一致：assistant_YYYYMMDD.log"""
+    return _main_log_dir() / ("assistant_%s.log" % _today_str())
 
 
 def _gateway_log_path():

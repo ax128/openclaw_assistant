@@ -30,7 +30,7 @@
     },
     "wander_speed": 0,
     "speed_level": 0,
-    "pet_size": 3,
+    "assistant_size": 3,
     "personality": "一个可爱的小女孩，喜欢探索和聊天，对新技术充满好奇",
     "default_position": {
       "x": 100,

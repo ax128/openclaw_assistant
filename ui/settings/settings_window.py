@@ -216,12 +216,12 @@ class SettingsWindow(QMainWindow):
         content_layout.addWidget(g_other)
 
         # ---------- 卡片：添加助手 ----------
-        g_add_pet = QGroupBox(t("add_character_btn"))
-        add_pet_layout = QVBoxLayout(g_add_pet)
-        add_pet_desc = QLabel(t("add_character_tooltip"))
-        add_pet_desc.setStyleSheet("color: #6b7280; font-size: 12px; margin-bottom: 12px;")
-        add_pet_desc.setWordWrap(True)
-        add_pet_layout.addWidget(add_pet_desc)
+        g_add_assistant = QGroupBox(t("add_character_btn"))
+        add_assistant_layout = QVBoxLayout(g_add_assistant)
+        add_assistant_desc = QLabel(t("add_character_tooltip"))
+        add_assistant_desc.setStyleSheet("color: #6b7280; font-size: 12px; margin-bottom: 12px;")
+        add_assistant_desc.setWordWrap(True)
+        add_assistant_layout.addWidget(add_assistant_desc)
         self.btn_add_character = QPushButton(t("add_character_btn"))
         self.btn_add_character.setCursor(Qt.PointingHandCursor)
         self.btn_add_character.setFocusPolicy(Qt.StrongFocus)
@@ -229,16 +229,16 @@ class SettingsWindow(QMainWindow):
         self.btn_add_character.setStyleSheet(_secondary_btn())
         self.btn_add_character.setToolTip(t("add_character_tooltip"))
         self.btn_add_character.clicked.connect(self._on_click_add_character)
-        add_pet_layout.addWidget(self.btn_add_character)
-        self.btn_edit_pet = QPushButton(t("edit_pet_btn"))
-        self.btn_edit_pet.setCursor(Qt.PointingHandCursor)
-        self.btn_edit_pet.setFocusPolicy(Qt.StrongFocus)
-        self.btn_edit_pet.setMinimumHeight(40)
-        self.btn_edit_pet.setStyleSheet(_secondary_btn())
-        self.btn_edit_pet.setToolTip(t("edit_pet_tooltip"))
-        self.btn_edit_pet.clicked.connect(self._on_click_edit_pet)
-        add_pet_layout.addWidget(self.btn_edit_pet)
-        content_layout.addWidget(g_add_pet)
+        add_assistant_layout.addWidget(self.btn_add_character)
+        self.btn_edit_assistant = QPushButton(t("edit_assistant_btn"))
+        self.btn_edit_assistant.setCursor(Qt.PointingHandCursor)
+        self.btn_edit_assistant.setFocusPolicy(Qt.StrongFocus)
+        self.btn_edit_assistant.setMinimumHeight(40)
+        self.btn_edit_assistant.setStyleSheet(_secondary_btn())
+        self.btn_edit_assistant.setToolTip(t("edit_assistant_tooltip"))
+        self.btn_edit_assistant.clicked.connect(self._on_click_edit_assistant)
+        add_assistant_layout.addWidget(self.btn_edit_assistant)
+        content_layout.addWidget(g_add_assistant)
 
         # ---------- 卡片：任务管理 ----------
         g_task = QGroupBox(t("task_manager_menu"))
@@ -258,23 +258,23 @@ class SettingsWindow(QMainWindow):
         content_layout.addWidget(g_task)
 
         # ---------- 卡片：助手基础 ----------
-        pet = assistant_window.assistant_manager.get_current_assistant() if (assistant_window and getattr(assistant_window, "assistant_manager", None)) else None
+        assistant = assistant_window.assistant_manager.get_current_assistant() if (assistant_window and getattr(assistant_window, "assistant_manager", None)) else None
         cfg = assistant_window.assistant_manager.get_current_assistant_config() if (assistant_window and getattr(assistant_window, "assistant_manager", None)) else None
-        g_pet = QGroupBox(t("pet_card"))
-        fl_pet = QFormLayout(g_pet)
-        fl_pet.setSpacing(10)
-        self.pet_name_edit = QLineEdit()
-        self.pet_name_edit.setPlaceholderText(t("pet_name_placeholder"))
-        self.pet_name_edit.setText((pet.data.get("name", "") or "") if pet and getattr(pet, "data", None) else "")
-        self.pet_name_edit.setToolTip(t("pet_name_tooltip"))
-        fl_pet.addRow(t("pet_name_label"), self.pet_name_edit)
-        self.pet_size_combo = NoWheelComboBox()
-        self.pet_size_combo.addItems([t("pet_size_1"), t("pet_size_2"), t("pet_size_3")])
-        pet_size_val = int(cfg.get_pet_size()) if cfg else 2
-        self.pet_size_combo.setCurrentIndex(max(0, min(2, pet_size_val - 1)))
-        self.pet_size_combo.setToolTip(t("pet_size_tooltip"))
-        fl_pet.addRow(t("pet_size_label"), self.pet_size_combo)
-        content_layout.addWidget(g_pet)
+        g_assistant = QGroupBox(t("assistant_card"))
+        fl_assistant = QFormLayout(g_assistant)
+        fl_assistant.setSpacing(10)
+        self.assistant_name_edit = QLineEdit()
+        self.assistant_name_edit.setPlaceholderText(t("assistant_name_placeholder"))
+        self.assistant_name_edit.setText((assistant.data.get("name", "") or "") if assistant and getattr(assistant, "data", None) else "")
+        self.assistant_name_edit.setToolTip(t("assistant_name_tooltip"))
+        fl_assistant.addRow(t("assistant_name_label"), self.assistant_name_edit)
+        self.assistant_size_combo = NoWheelComboBox()
+        self.assistant_size_combo.addItems([t("assistant_size_1"), t("assistant_size_2"), t("assistant_size_3")])
+        assistant_size_val = int(cfg.get_assistant_size()) if cfg else 2
+        self.assistant_size_combo.setCurrentIndex(max(0, min(2, assistant_size_val - 1)))
+        self.assistant_size_combo.setToolTip(t("assistant_size_tooltip"))
+        fl_assistant.addRow(t("assistant_size_label"), self.assistant_size_combo)
+        content_layout.addWidget(g_assistant)
 
         # ---------- 卡片：气泡 ----------
         g_bubble = QGroupBox(t("bubble_card"))
@@ -420,12 +420,12 @@ class SettingsWindow(QMainWindow):
         """从当前助手与配置刷新「助手基础」「气泡」「状态与动画」表单，编辑/删除助手后调用。"""
         if not self.assistant_window or not getattr(self.assistant_window, "assistant_manager", None):
             return
-        pet = self.assistant_window.assistant_manager.get_current_assistant()
+        assistant = self.assistant_window.assistant_manager.get_current_assistant()
         cfg = self.assistant_window.assistant_manager.get_current_assistant_config()
-        if pet and getattr(pet, "data", None):
-            self.pet_name_edit.setText((pet.data.get("name", "") or "").strip())
+        if assistant and getattr(assistant, "data", None):
+            self.assistant_name_edit.setText((assistant.data.get("name", "") or "").strip())
         if cfg:
-            self.pet_size_combo.setCurrentIndex(max(0, min(2, int(cfg.get_pet_size()) - 1)))
+            self.assistant_size_combo.setCurrentIndex(max(0, min(2, int(cfg.get_assistant_size()) - 1)))
             self.bubble_enabled_checkbox.setChecked(bool(cfg.get_bubble_enabled()))
             self.anim_interval_ms.setValue(int(cfg.get_anim_interval_ms()))
             self.pause_resume_delay.setValue(float(cfg.get_pause_resume_delay()))
@@ -470,13 +470,13 @@ class SettingsWindow(QMainWindow):
         if hasattr(self, "_get_chat_values") and callable(self._get_chat_values):
             for k, v in self._get_chat_values().items():
                 self.settings.set(k, v)
-        pet = self.assistant_window.assistant_manager.get_current_assistant() if (self.assistant_window and getattr(self.assistant_window, "assistant_manager", None)) else None
-        if pet and getattr(pet, "data", None):
+        assistant = self.assistant_window.assistant_manager.get_current_assistant() if (self.assistant_window and getattr(self.assistant_window, "assistant_manager", None)) else None
+        if assistant and getattr(assistant, "data", None):
             # 助手基础（系统级参数已迁至 config/system_settings.json，不再写回 data.json app_settings）
-            name_text = (self.pet_name_edit.text() or "").strip()
-            pet.data["name"] = name_text if name_text else pet.data.get("name", "")
-            cfg = pet.data.setdefault("config", {})
-            cfg["pet_size"] = self.pet_size_combo.currentIndex() + 1
+            name_text = (self.assistant_name_edit.text() or "").strip()
+            assistant.data["name"] = name_text if name_text else assistant.data.get("name", "")
+            cfg = assistant.data.setdefault("config", {})
+            cfg["assistant_size"] = self.assistant_size_combo.currentIndex() + 1
             # 气泡
             cfg["bubble_enabled"] = self.bubble_enabled_checkbox.isChecked()
             # 状态与动画
@@ -502,9 +502,9 @@ class SettingsWindow(QMainWindow):
 
     def _save_worker(self):
         """后台执行：助手 data 落盘 + 系统设置落盘；任一步失败则抛异常，由 on_error 弹窗。"""
-        pet = self.assistant_window.assistant_manager.get_current_assistant() if (self.assistant_window and getattr(self.assistant_window, "assistant_manager", None)) else None
-        if pet and getattr(pet, "data", None):
-            pet.save()
+        assistant = self.assistant_window.assistant_manager.get_current_assistant() if (self.assistant_window and getattr(self.assistant_window, "assistant_manager", None)) else None
+        if assistant and getattr(assistant, "data", None):
+            assistant.save()
         self.settings.save()
 
     def _restore_save_btn(self):
@@ -617,12 +617,12 @@ class SettingsWindow(QMainWindow):
                     logger.info("添加助手后已刷新助手列表")
         except Exception as e:
             logger.exception(f"打开添加助手弹窗失败: {e}")
-            QMessageBox.warning(self, t("add_pet_failed"), str(e))
+            QMessageBox.warning(self, t("add_assistant_failed"), str(e))
 
-    def _on_click_edit_pet(self):
-        QTimer.singleShot(0, self._open_edit_pet)
+    def _on_click_edit_assistant(self):
+        QTimer.singleShot(0, self._open_edit_assistant)
 
-    def _open_edit_pet(self):
+    def _open_edit_assistant(self):
         try:
             import os
             assistants_dir = os.path.normpath(os.path.join(
@@ -631,7 +631,7 @@ class SettingsWindow(QMainWindow):
             ))
             from ui.settings.edit_assistant_dialog import EditAssistantDialog, _list_assistant_folders
             if not _list_assistant_folders(assistants_dir):
-                QMessageBox.information(self, t("tip_title"), t("edit_pet_no_pets"))
+                QMessageBox.information(self, t("tip_title"), t("edit_assistant_no_assistants"))
                 return
             dlg = EditAssistantDialog(assistants_dir, parent=self)
             dlg.setWindowModality(Qt.ApplicationModal)
@@ -639,16 +639,16 @@ class SettingsWindow(QMainWindow):
                 if self.assistant_window and getattr(self.assistant_window, "assistant_manager", None):
                     pm = self.assistant_window.assistant_manager
                     pm.load_all_assistants()
-                    pet = pm.get_current_assistant()
-                    if pet and hasattr(pet, "load"):
-                        pet.load()
+                    assistant = pm.get_current_assistant()
+                    if assistant and hasattr(assistant, "load"):
+                        assistant.load()
                     if hasattr(self.assistant_window, "_reload_for_current_assistant"):
                         self.assistant_window._reload_for_current_assistant()
                     self._refresh_assistant_form()
                     logger.info("编辑/删除助手后已刷新助手列表")
         except Exception as e:
             logger.exception(f"打开编辑助手弹窗失败: {e}")
-            QMessageBox.warning(self, t("add_pet_failed"), str(e))
+            QMessageBox.warning(self, t("add_assistant_failed"), str(e))
 
     def _on_click_task_manager(self):
         QTimer.singleShot(0, self._open_task_manager)
@@ -661,7 +661,7 @@ class SettingsWindow(QMainWindow):
                 QMessageBox.warning(self, t("tip_title"), t("task_no_manager_short"))
         except Exception as e:
             logger.exception(f"打开任务管理失败: {e}")
-            QMessageBox.warning(self, t("add_pet_failed"), str(e))
+            QMessageBox.warning(self, t("add_assistant_failed"), str(e))
 
     def _on_click_clear_cache(self):
         """延迟一帧打开，避免在滚动区内点击被吞掉"""
@@ -672,9 +672,9 @@ class SettingsWindow(QMainWindow):
             from ui.settings.clear_cache_window import ClearCacheWindow
             bot_id = "bot00001"
             if self.assistant_window and getattr(self.assistant_window, "assistant_manager", None):
-                pet = self.assistant_window.assistant_manager.get_current_assistant()
-                if pet:
-                    bot_id = (pet.get("bot_id") if hasattr(pet, "get") else getattr(pet, "assistant_name", None)) or bot_id
+                assistant = self.assistant_window.assistant_manager.get_current_assistant()
+                if assistant:
+                    bot_id = (assistant.get("bot_id") if hasattr(assistant, "get") else getattr(assistant, "assistant_name", None)) or bot_id
             self._clear_cache_window = ClearCacheWindow(bot_id, self.assistant_window)
             w = self._clear_cache_window
             w.setWindowModality(Qt.NonModal)

@@ -21,10 +21,10 @@ class MovementController:
         """开始游走"""
         self.enabled = self.assistant_config.get_wander_enabled()
         if self.enabled:
-            logger.info(f"启动助手游走: {(getattr(self.assistant_data, "assistant_name", None) or getattr(self.assistant_data, "pet_name", ""))}")
+            logger.info(f"启动助手游走: {getattr(self.assistant_data, "assistant_name", "")}")
             self._set_new_target()
         else:
-            logger.info(f"助手游走已禁用: {(getattr(self.assistant_data, "assistant_name", None) or getattr(self.assistant_data, "pet_name", ""))}")
+            logger.info(f"助手游走已禁用: {getattr(self.assistant_data, "assistant_name", "")}")
     
     def set_speed(self, speed):
         """设置移动速度（0=禁止，1=慢，2=中，3=快）"""
@@ -40,7 +40,7 @@ class MovementController:
     def stop(self):
         """停止游走"""
         if self.enabled:
-            logger.debug(f"停止助手游走: {(getattr(self.assistant_data, "assistant_name", None) or getattr(self.assistant_data, "pet_name", ""))}")
+            logger.debug(f"停止助手游走: {getattr(self.assistant_data, "assistant_name", "")}")
         self.enabled = False
     
     def _set_new_target(self):

@@ -20,7 +20,7 @@
 | **敏感文件** | `gateway_token.txt`、`.gateway_token` | 根目录或脚本目录下的 token 文件 |
 | **环境变量** | `.env`、`.env.local`、`.env.*.local` | 若使用 |
 | **日志** | `logs/`、`tests/test.log` | 日志与测试输出 |
-| **遗留/打包** | `pets/`、`build/`、`dist/`、`*.egg-info/` 等 | 见 .gitignore 全文 |
+| **遗留/打包** | `pets/`（遗留目录名）、`build/`、`dist/`、`*.egg-info/` 等 | 见 .gitignore 全文 |
 
 **若曾误提交过 `config/gateway.json` 或 `config/.gateway_key`**：需从历史中删除并轮换 token/密钥（如 `git filter-repo` 或 BFG），详见 GitHub 文档。
 
@@ -28,15 +28,8 @@
 
 ## 二、已修正的表述
 
-- **pet_window.py**：文档字符串中 `pets/current.json` 已改为 `assistants/current.json`，与当前数据目录一致。
+- **assistant 相关（已移除 pet）**：已删除原 pet 相关 UI/core 文件；i18n 与界面文案统一为「助手」相关键（如 `select_assistant_menu`、`add_assistant_*`、`edit_assistant_*`）；会话渠道前缀为 `claw_assistant_<时间戳>`（`CHANNEL_CLAW_ASSISTANT_PREFIX`）；配置键为 `assistant_size`、`gap_above_assistant_px` 等。
 - **.gitignore**：已增加 `assistants/next_bot_seq.json`，避免提交自动生成的序号文件。
-
----
-
-## 三、可选优化（命名与示例）
-
-- **i18n「选择机器人」**：若希望与项目名「助手」完全一致，可将「选择机器人」改为「选择助手」、英文 "Select robot" 改为 "Select assistant"（`utils/i18n.py` 中 `select_robot_menu`）。
-- **sessionKey 示例 `claw_pet`**：当前新建会话渠道前缀为 `claw_pet_<时间戳>`（`session_list_window.py` 中 `CHANNEL_CLAW_PET_PREFIX`），i18n 占位符为 `agent:work:claw_pet`。若 Gateway/后端已统一为 `claw_assistant`，可改为 `claw_assistant` 并同步文档与占位符；否则保持 `claw_pet` 以兼容现有会话。
 
 ---
 
@@ -49,3 +42,45 @@
 5. **脚本中的 print**：`scripts/migrate_sprites_to_folders.py`、`utils/md_skill_to_json.py` 中的 `print` 为脚本/CLI 输出，可保留。
 
 上传前建议执行：`git status` 确认无上述敏感或生成文件被纳入提交。
+
+---
+
+## 五、如何更新到 GitHub
+
+### 首次推送（仓库尚未有本地 Git）
+
+1. 在项目根目录打开终端（PowerShell 或 CMD）。
+2. 依次执行（将 `ax128/openclaw_assistant` 换成你的用户名/仓库名）：
+
+```powershell
+cd D:\openclaw-main\claw_assistant
+git init
+git remote add origin https://github.com/ax128/openclaw_assistant.git
+git add .
+git status
+git commit -m "Initial commit: Claw Assistant desktop client"
+git branch -M main
+git push -u origin main
+```
+
+3. 按提示登录 GitHub（浏览器或凭证管理器）；推送完成后代码会出现在 `https://github.com/ax128/openclaw_assistant`。
+
+### 之后每次更新（已有 Git 且已关联远程）
+
+1. 在项目根目录打开终端。
+2. 执行：
+
+```powershell
+cd D:\openclaw-main\claw_assistant
+git add .
+git status
+git commit -m "你的提交说明，例如：统一为 assistant"
+git push
+```
+
+3. 若远程有其他人或其它分支的提交，先执行 `git pull --rebase` 再 `git push`。
+
+### 注意
+
+- 推送前务必确认 `git status` 里**没有** `config/gateway.json`、`config/.gateway_key`、`logs/`、`assistants/current.json`、`assistants/next_bot_seq.json` 等（这些应在 .gitignore 中）。
+- 若使用 SSH：`git remote add origin git@github.com:ax128/openclaw_assistant.git`，并确保本机已配置 SSH 密钥。

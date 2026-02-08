@@ -16,7 +16,7 @@ def _bubble_cfg():
         tail = sb.get("tail") or {}
         return {
             "default_duration_ms": int(sb.get("default_duration_ms", 15000)),
-            "gap_above_pet_px": int(sb.get("gap_above_pet_px", 2)),
+            "gap_above_assistant_px": int(sb.get("gap_above_assistant_px", 2)),
             "tail_w": int(tail.get("width_px", 14)),
             "tail_h": int(tail.get("height_px", 12)),
             "border_px": int(sb.get("border_px", 2)),
@@ -29,7 +29,7 @@ def _bubble_cfg():
     except Exception:
         return {
             "default_duration_ms": 15000,
-            "gap_above_pet_px": 2,
+            "gap_above_assistant_px": 2,
             "tail_w": 14,
             "tail_h": 12,
             "border_px": 2,
@@ -70,7 +70,7 @@ class SpeechBubble(QWidget):
         self._border_px = cfg["border_px"]
         self._close_btn = cfg["close_button_size_px"]
         self._radius_px = cfg["radius_px"]
-        self._gap_above_pet = cfg["gap_above_pet_px"]
+        self._gap_above_assistant = cfg["gap_above_assistant_px"]
         _chars = cfg["chars_per_line"]
         self._lines_height = cfg["lines_height"]  # 最大显示行数，供 _adjust_height 使用
         _lines = self._lines_height
@@ -195,9 +195,9 @@ class SpeechBubble(QWidget):
         pw = self.parent_widget.width()
         ph = self.parent_widget.height()
         bw, bh = self.width(), self.height()
-        # 气泡在助手正上方，紧贴（_gap_above_pet 像素）
+        # 气泡在助手正上方，紧贴（_gap_above_assistant 像素）
         bx = px + (pw - bw) // 2
-        by = py - bh - self._gap_above_pet
+        by = py - bh - self._gap_above_assistant
         # 限制在虚拟桌面内，避免被裁到屏幕外
         try:
             screen = QApplication.screenAt(QPoint(px + pw // 2, py))

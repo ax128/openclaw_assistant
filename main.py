@@ -14,24 +14,23 @@ from config.settings import Settings
 from core.assistant_manager import AssistantManager
 
 
-def _migrate_pets_to_assistants_once(assistants_dir):
-    """一次性迁移：若 assistants 为空且 pets 下有助手数据，则复制到 assistants 并写入 current.json。"""
-    pets_dir = os.path.normpath(os.path.join(ROOT, "pets"))
-    if not os.path.isdir(pets_dir):
+def _migrate_legacy_to_assistants_once(assistants_dir):
+    """一次性迁移：若 assistants 为空且旧目录（pets）下有助手数据，则复制到 assistants 并写入 current.json。"""
+    legacy_dir = os.path.normpath(os.path.join(ROOT, "pets"))
+    if not os.path.isdir(legacy_dir):
         return False
-    # 找出 pets 下所有带 data.json 的助手文件夹
     to_copy = []
-    for name in os.listdir(pets_dir):
+    for name in os.listdir(legacy_dir):
         if name.startswith(".") or name in ("next_bot_seq.json", "README.md", "skills", "__pycache__"):
             continue
-        path = os.path.join(pets_dir, name)
+        path = os.path.join(legacy_dir, name)
         if os.path.isdir(path) and os.path.isfile(os.path.join(path, "data.json")):
             to_copy.append(name)
     if not to_copy:
         return False
     os.makedirs(assistants_dir, exist_ok=True)
     for name in to_copy:
-        src = os.path.join(pets_dir, name)
+        src = os.path.join(legacy_dir, name)
         dst = os.path.join(assistants_dir, name)
         if os.path.exists(dst):
             continue
@@ -40,14 +39,13 @@ def _migrate_pets_to_assistants_once(assistants_dir):
             logger.info(f"已迁移助手: {name}")
         except Exception as e:
             logger.warning(f"迁移助手 {name} 失败: {e}")
-    # 若 pets/current.json 存在，写入 assistants/current.json（新键名）
-    pets_current = os.path.join(pets_dir, "current.json")
-    if os.path.isfile(pets_current):
+    legacy_current_path = os.path.join(legacy_dir, "current.json")
+    if os.path.isfile(legacy_current_path):
         try:
-            with open(pets_current, "r", encoding="utf-8") as f:
+            with open(legacy_current_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             bootstrap = {
-                "current_assistant": data.get("current_pet", data.get("current_assistant", "bot00001")),
+                "current_assistant": data.get("current_assistant", "bot00001"),
                 "assistants_dir": "assistants",
             }
             current_file = os.path.join(assistants_dir, "current.json")
@@ -80,9 +78,9 @@ def main():
         assistants_dir = os.path.normpath(os.path.join(ROOT, assistants_dir_rel))
         os.makedirs(assistants_dir, exist_ok=True)
         assistant_manager = AssistantManager(assistants_dir)
-        # 若 assistants 为空且存在 pets 数据，执行一次性迁移到 assistants
+        # 若 assistants 为空且存在旧目录数据，执行一次性迁移到 assistants
         if not assistant_manager.list_assistants():
-            if _migrate_pets_to_assistants_once(assistants_dir):
+            if _migrate_legacy_to_assistants_once(assistants_dir):
                 settings.load()
                 assistant_manager = AssistantManager(assistants_dir)
         logger.info(f"发现 {len(assistant_manager.list_assistants())} 个助手: {assistant_manager.list_assistants()}")

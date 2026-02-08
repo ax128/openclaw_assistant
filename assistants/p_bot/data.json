@@ -2,14 +2,14 @@
   "name": "小强",
   "level": 1,
   "experience": 0,
-  "state": "walking",
+  "state": "happy",
   "position": {
-    "x": 1818,
-    "y": 703
+    "x": 1698,
+    "y": 608
   },
   "interaction_history": [],
   "created_at": "",
-  "last_active": "2026-02-08T16:34:56.320836",
+  "last_active": "2026-02-08T17:17:20.380643",
   "state_to_sprite_folder": {
     "idle": "idle",
     "walking": "walk",
@@ -30,7 +30,7 @@
     },
     "wander_speed": 0,
     "speed_level": 0,
-    "pet_size": 3,
+    "assistant_size": 3,
     "personality": "一个可爱的小机器人，喜欢探索和聊天，对新技术充满好奇",
     "default_position": {
       "x": 100,

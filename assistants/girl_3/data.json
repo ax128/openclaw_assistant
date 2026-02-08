@@ -30,7 +30,7 @@
     },
     "wander_speed": 1,
     "speed_level": 1,
-    "pet_size": 2,
+    "assistant_size": 2,
     "personality": "美丽可爱的女孩",
     "default_position": {
       "x": 100,

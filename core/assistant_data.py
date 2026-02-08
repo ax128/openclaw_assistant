@@ -14,7 +14,7 @@ DEFAULT_CONFIG = {
     "wander_boundary": {"x": 0, "y": 0, "width": 1920, "height": 1080},
     "wander_speed": 2,
     "speed_level": 1,
-    "pet_size": 2,
+    "assistant_size": 2,
     "personality": "",
     "default_position": {"x": 100, "y": 100},
     "description": "",

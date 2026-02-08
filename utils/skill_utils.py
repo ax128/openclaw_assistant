@@ -103,7 +103,7 @@ class SkillUtils:
             skill: 技能配置字典（如 auto_interaction_skill.json 中单条），需含 call_function、
                   function_name、function_params、return_result 等。
             context: 可选上下文，供参数占位符使用，如 {"user_message": "...", "current_hour": 9,
-                    "pet_state": "happy", "locale": "zh"}，便于函数或下游用「当前用户话术/时间/状态」做个性化。
+                    "assistant_state": "happy", "locale": "zh"}，便于函数或下游用「当前用户话术/时间/状态」做个性化。
 
         Returns:
             {

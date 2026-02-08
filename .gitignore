@@ -34,7 +34,7 @@ gateway_token.txt
 .env.local
 .env.*.local
 
-# 遗留目录（从 pets 迁移到 assistants 后，本地可能仍有 pets）
+# 遗留目录（原 pets 目录名，迁移到 assistants 后本地可能仍存在）
 pets/
 
 # 打包/构建产物

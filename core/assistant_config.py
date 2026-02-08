@@ -56,11 +56,11 @@ class AssistantConfig:
             return 2
         return 3
 
-    def get_pet_size(self):
-        return self.config.get("pet_size", 2)
+    def get_assistant_size(self):
+        return self.config.get("assistant_size", 2)
 
-    def set_pet_size(self, size):
-        self.config["pet_size"] = size
+    def set_assistant_size(self, size):
+        self.config["assistant_size"] = size
         self.assistant_data.save()
         logger.info(f"设置助手大小: {size}")
 

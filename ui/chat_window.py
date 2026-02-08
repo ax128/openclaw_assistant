@@ -85,10 +85,10 @@ SLASH_COMMANDS = [
 class ChatWindow(QMainWindow):
     """聊天窗口 - 消息列表 + 输入 + 发送，AI 线程回复"""
 
-    def __init__(self, pet_name, pet_personality="", assistant_window=None, session_id=None, session_key=None, agent_name=None, gateway_client=None):
+    def __init__(self, assistant_name, assistant_personality="", assistant_window=None, session_id=None, session_key=None, agent_name=None, gateway_client=None):
         super().__init__()
-        self.pet_name = pet_name
-        self.pet_personality = pet_personality
+        self.assistant_name = assistant_name
+        self.assistant_personality = assistant_personality
         self.assistant_window = assistant_window
         self.gateway_client = gateway_client if gateway_client is not None else getattr(assistant_window, "gateway_client", None)
         # 仅 Gateway 会话持久化；本地历史已移除，非 Gateway 为仅内存会话
@@ -96,11 +96,11 @@ class ChatWindow(QMainWindow):
         if self._gateway_mode:
             self.session_id = (session_key or "").strip()
             self.chat_history = None
-            display_name = (agent_name or pet_name or "Agent").strip() or pet_name
+            display_name = (agent_name or assistant_name or "Agent").strip() or assistant_name
         else:
             self.session_id = session_id or str(uuid.uuid4())
             self.chat_history = None
-            display_name = pet_name
+            display_name = assistant_name
         cfg = assistant_window.assistant_manager.get_current_assistant_config() if (assistant_window and getattr(assistant_window, "assistant_manager", None)) else None
         _max_msg = get_ui_setting("chat_window.max_display_messages", 200)
         self._max_display_messages = int(cfg.get_timing("chat_max_display_messages", _max_msg)) if cfg else _max_msg
@@ -374,14 +374,17 @@ class ChatWindow(QMainWindow):
         if hasattr(self, "_font_menu") and self._font_menu:
             self._font_menu.setFont(f)
 
-    def _get_pet_description(self):
+    def _get_assistant_description(self):
         """从当前助手 data.config.description 取设定描述，用于第一条消息与提示词"""
         if not self.assistant_window or not getattr(self.assistant_window, "assistant_manager", None):
             return ""
-        pet = self.assistant_window.assistant_manager.get_current_assistant()
-        if not pet:
+        assistant = self.assistant_window.assistant_manager.get_current_assistant()
+        if not assistant:
             return ""
-        return ((pet.get("config") or {}).get("description") or "").strip()
+        cfg = assistant.data.get("config", {}) if getattr(assistant, "data", None) else (assistant.get("config") if hasattr(assistant, "get") else {})
+        if not isinstance(cfg, dict):
+            cfg = {}
+        return (cfg.get("description") or "").strip()
 
     def _extract_content_text(self, content):
         """从 Gateway 消息 content 提取文本（支持 string 或 content 数组，与 Gateway 协议一致）。"""
@@ -444,9 +447,9 @@ class ChatWindow(QMainWindow):
             self._refresh_display(preserve_scroll=False)
             return
         # 非 Gateway：仅内存，无本地持久化
-        desc = self._get_pet_description()
+        desc = self._get_assistant_description()
         if desc:
-            self._display_blocks.append(f"{self.pet_name}: {desc}")
+            self._display_blocks.append(f"{self.assistant_name}: {desc}")
         self._refresh_display(preserve_scroll=False)
 
     def _append_display(self, sender, msg, message_id=None):
@@ -514,7 +517,7 @@ class ChatWindow(QMainWindow):
             if block.get("type") == "user":
                 return time_line + f'<div class="user-msg">{content}</div>'
             if block.get("type") == "ai":
-                display_content = f"{self.pet_name}: {content}" if content else str(self.pet_name)
+                display_content = f"{self.assistant_name}: {content}" if content else str(self.assistant_name)
                 return time_line + f'<div class="ai-msg">{esc(display_content)}</div>'
             return time_line + f'<div class="system-msg">{content}</div>'
         return time_line + f'<div class="ai-msg">{esc(block)}</div>'
@@ -573,9 +576,9 @@ class ChatWindow(QMainWindow):
             return
         self._loading_dots = (self._loading_dots + 1) % 4  # 0, 1, 2, 3 循环
         dots = "." * self._loading_dots
-        pet_name = self.pet_name or t("pet_default_name")
+        assistant_name = self.assistant_name or t("assistant_default_name")
         # 使用较小的字体显示（通过空格缩进模拟居中效果）
-        loading_text = f"  {pet_name}{t('pet_working')}{dots}"
+        loading_text = f"  {assistant_name}{t('assistant_working')}{dots}"
         
         # 更新显示块
         for i, block in enumerate(self._display_blocks):
@@ -774,8 +777,8 @@ class ChatWindow(QMainWindow):
         self._loading_dots = 1
         
         # 显示初始加载提示（使用特殊格式，不显示"系统:"前缀）
-        pet_name = self.pet_name or t("pet_default_name")
-        loading_text = f"  {pet_name}{t('pet_working')}."
+        assistant_name = self.assistant_name or t("assistant_default_name")
+        loading_text = f"  {assistant_name}{t('assistant_working')}."
         # 直接添加到显示块，不使用"系统:"前缀
         self._display_blocks.append({"id": self._loading_message_id, "content": loading_text})
         self._refresh_display()

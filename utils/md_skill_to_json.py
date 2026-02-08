@@ -98,7 +98,7 @@ def _extract_keywords(description, sections):
 
 def md_skill_to_json(md_path, out_path=None):
     """
-    读取 MD 文件，转换为技能 JSON（单条技能，符合 pets/skills/*.json 子项格式）。
+    读取 MD 文件，转换为技能 JSON（单条技能，符合 assistants 技能 JSON 子项格式）。
     out_path 为空时输出到同目录下 {skill_id}.json。
     """
     with open(md_path, "r", encoding="utf-8") as f:

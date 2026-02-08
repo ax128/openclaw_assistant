@@ -1,7 +1,7 @@
 """
 会话列表窗口
 支持 Gateway（选择 Agent + Session）与本地会话；双击打开聊天。
-新建 Gateway 会话使用渠道标识 claw_pet_<时间戳>，sessionKey=agent:<当前agent>:claw_pet_<时间戳>。
+新建 Gateway 会话使用渠道标识 claw_assistant_<时间戳>，sessionKey=agent:<当前agent>:claw_assistant_<时间戳>。
 提供模型列表、技能状态、定时任务（Gateway 请求）展示。
 """
 import json
@@ -37,8 +37,8 @@ def _chat_font_pt_default():
 
 
 CHAT_FONT_PT_DEFAULT = 15  # 仅作 _get_chat_font_pt 回退，实际默认从 ui_settings 读
-# 桌面助手新建会话渠道前缀，完整 channel = claw_pet_<时间戳>，sessionKey = agent:<agentId>:claw_pet_<时间戳>
-CHANNEL_CLAW_PET_PREFIX = "claw_pet"
+# 桌面助手新建会话渠道前缀，完整 channel = claw_assistant_<时间戳>，sessionKey = agent:<agentId>:claw_assistant_<时间戳>
+CHANNEL_CLAW_ASSISTANT_PREFIX = "claw_assistant"
 # Gateway 会话列表定时刷新间隔（毫秒），与 Gateway 保持同步
 GATEWAY_SESSION_REFRESH_MS = 25000
 # 全局固定 Agent：关闭会话管理后再次打开时恢复上次选中的 Agent
@@ -48,10 +48,10 @@ _GLOBAL_PINNED_AGENT_ID = None
 class SessionListWindow(QMainWindow):
     """会话列表 - 新建/打开会话 -> ChatWindow"""
 
-    def __init__(self, pet_name, pet_personality="", assistant_window=None, gateway_client=None):
+    def __init__(self, assistant_name, assistant_personality="", assistant_window=None, gateway_client=None):
         super().__init__()
-        self.pet_name = pet_name
-        self.pet_personality = pet_personality
+        self.assistant_name = assistant_name
+        self.assistant_personality = assistant_personality
         self.assistant_window = assistant_window
         self.gateway_client = gateway_client if gateway_client is not None else getattr(assistant_window, "gateway_client", None)
         self.chat_windows = {}
@@ -64,7 +64,7 @@ class SessionListWindow(QMainWindow):
         # 用户选中的 Agent 固定值：从全局恢复，刷新/事件更新后也先恢复此项；用户切换时写回全局
         self._pinned_agent_id = _GLOBAL_PINNED_AGENT_ID
 
-        self.setWindowTitle(t("session_list_title_prefix") + pet_name)
+        self.setWindowTitle(t("session_list_title_prefix") + assistant_name)
         geom = get_ui_setting("session_list_window.geometry") or {}
         self.setGeometry(
             int(geom.get("x", 300)),
@@ -324,42 +324,53 @@ class SessionListWindow(QMainWindow):
             self._models_list.addItem(item)
 
     def _get_provider_config_for_model_key(self, model_key):
-        """根据 agents.defaults.models 的 key 解析 provider_key（key 中第一个 / 前的部分），从 config.models.providers 取对应配置。返回 (provider_config_dict, provider_key) 或 (None, None)。"""
+        """根据 agents.defaults.models 的 key 解析 provider_key（key 中第一个 / 前的部分），从 config.models.providers 取对应配置。
+        若 models.providers 中无该 key（Gateway 可能未下发或 key 命名不一致），则回退到 agents.defaults.models[model_key] 的条目（含 alias 等）用于展示。
+        返回 (config_dict, display_key) 或 (None, display_key)。"""
         if not model_key or not isinstance(model_key, str):
             return None, None
         ok, payload, _ = gateway_memory.get_config()
         if not ok or not payload or not isinstance(payload, dict):
-            return None, None
+            return None, model_key
         config = payload.get("config") or payload
         if not isinstance(config, dict):
-            return None, None
-        models_block = config.get("models") or {}
-        if not isinstance(models_block, dict):
-            return None, None
-        providers = models_block.get("providers") or {}
-        if not isinstance(providers, dict):
-            return None, None
+            return None, model_key
         provider_key = model_key.split("/")[0].strip() if "/" in model_key else model_key.strip()
-        provider_config = providers.get(provider_key)
-        if provider_config is None or not isinstance(provider_config, dict):
-            return None, provider_key
-        return provider_config, provider_key
+        # 1) 优先从 config.models.providers[provider_key] 取 provider 级配置
+        models_block = config.get("models") or {}
+        if isinstance(models_block, dict):
+            providers = models_block.get("providers") or {}
+            if isinstance(providers, dict):
+                provider_config = providers.get(provider_key)
+                if isinstance(provider_config, dict):
+                    return provider_config, provider_key
+        # 2) 回退：展示 agents.defaults.models[model_key] 的条目（alias 等），便于用户至少看到该模型在 allowlist 中的信息
+        agents_block = config.get("agents") or {}
+        if isinstance(agents_block, dict):
+            defaults = agents_block.get("defaults") or {}
+            if isinstance(defaults, dict):
+                models_dict = defaults.get("models") or {}
+                if isinstance(models_dict, dict):
+                    entry = models_dict.get(model_key)
+                    if isinstance(entry, dict):
+                        return entry, model_key
+        return None, provider_key
 
     def _on_model_double_clicked(self, item):
         """双击模型：根据 key 找到 models.providers[provider_key]，以表单/ Raw 形式展示（与添加模型一样的窗口风格）。"""
         if not item:
             return
         model_key = item.data(Qt.UserRole)
-        provider_config, provider_key = self._get_provider_config_for_model_key(model_key)
+        provider_config, display_key = self._get_provider_config_for_model_key(model_key)
         if provider_config is None:
             QMessageBox.information(
                 self,
                 t("model_config_title"),
-                t("model_provider_not_found"),
+                t("model_provider_not_found_fmt") % (model_key, display_key),
             )
             return
         content = json.dumps(provider_config, ensure_ascii=False, indent=2)
-        title = "%s - %s" % (t("model_config_title"), provider_key)
+        title = "%s - %s" % (t("model_config_title"), display_key)
         dialog = ConfigViewDialog(content, title=title, parent=self, parsed_config=provider_config)
         dialog.show()
         dialog.raise_()
@@ -379,12 +390,12 @@ class SessionListWindow(QMainWindow):
         if not item:
             return
         model_key = item.data(Qt.UserRole)
-        provider_config, provider_key = self._get_provider_config_for_model_key(model_key)
+        provider_config, display_key = self._get_provider_config_for_model_key(model_key)
         if provider_config is None:
             QMessageBox.information(
                 self,
                 t("model_config_title"),
-                t("model_provider_not_found"),
+                t("model_provider_not_found_fmt") % (model_key, display_key),
             )
             return
         text = json.dumps(provider_config, ensure_ascii=False, indent=2)
@@ -823,7 +834,7 @@ class SessionListWindow(QMainWindow):
         agent = self._gateway_agents[idx]
         agent_id = agent.get("agentId") or "main"
         agent_name = agent.get("name") or agent_id
-        channel = "%s_%s" % (CHANNEL_CLAW_PET_PREFIX, int(time.time()))
+        channel = "%s_%s" % (CHANNEL_CLAW_ASSISTANT_PREFIX, int(time.time()))
         session_key = "agent:%s:%s" % (agent_id, channel)
         self._open_chat(session_key=session_key, agent_name=agent_name)
         self._fetch_gateway_health()
@@ -946,7 +957,7 @@ class SessionListWindow(QMainWindow):
         try:
             if key not in self.chat_windows or not self.chat_windows[key].isVisible():
                 w = ChatWindow(
-                    self.pet_name, self.pet_personality,
+                    self.assistant_name, self.assistant_personality,
                     self.assistant_window,
                     session_id=session_id,
                     session_key=session_key,

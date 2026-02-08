@@ -5,9 +5,9 @@ import os
 import shutil
 
 
-# 默认源图：p_bot 的 paused/1.png（子文件夹结构）或 paused_1.png（平铺）
+# 默认源图：assistants 下某助手的 paused/1.png（子文件夹结构）或 paused_1.png（平铺）
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_DEFAULT_PAUSED = os.path.join(_ROOT, "core", "pets", "p_bot", "assets", "sprites")
+_DEFAULT_PAUSED = os.path.join(_ROOT, "assistants", "p_bot", "assets", "sprites")
 DEFAULT_SOURCE = os.path.join(_DEFAULT_PAUSED, "paused", "1.png")
 if not os.path.isfile(DEFAULT_SOURCE):
     DEFAULT_SOURCE = os.path.join(_DEFAULT_PAUSED, "paused_1.png")

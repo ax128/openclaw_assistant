@@ -1,7 +1,7 @@
 """
 将 sprites 下平铺的动作图片迁移到按动作分类的子文件夹。
 用法: python scripts/migrate_sprites_to_folders.py [sprites目录]
-默认: pets/p_bot/assets/sprites
+默认: assistants/<助手名>/assets/sprites
 若遇权限错误，请关闭占用该目录的程序后重试。
 映射从同助手的 data.json 的 state_to_sprite_folder 读取，缺省用默认映射。
 """
@@ -18,9 +18,9 @@ from core.assistant_data import DEFAULT_STATE_TO_SPRITE_FOLDER
 
 def _prefix_to_folder(sprites_dir):
     """从 sprites_dir 推断助手目录下的 data.json，读取 state_to_sprite_folder，构建 前缀->文件夹 映射。"""
-    # sprites_dir = .../pet_id/assets/sprites -> pet_dir = .../pet_id
-    pet_dir = os.path.dirname(os.path.dirname(sprites_dir))
-    data_path = os.path.join(pet_dir, "data.json")
+    # sprites_dir = .../<助手名>/assets/sprites -> assistant_dir = .../<助手名>
+    assistant_dir = os.path.dirname(os.path.dirname(sprites_dir))
+    data_path = os.path.join(assistant_dir, "data.json")
     mapping = DEFAULT_STATE_TO_SPRITE_FOLDER.copy()
     if os.path.isfile(data_path):
         try:
@@ -73,7 +73,7 @@ def migrate(sprites_dir):
 
 
 def main():
-    default = os.path.join(ROOT, "pets", "p_bot", "assets", "sprites")
+    default = os.path.join(ROOT, "assistants", "p_bot", "assets", "sprites")
     sprites_dir = sys.argv[1] if len(sys.argv) > 1 else default
     print(f"迁移目录: {sprites_dir}")
     n = migrate(sprites_dir)

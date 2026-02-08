@@ -118,18 +118,18 @@ def _validate_sprite_files(file_paths: list) -> tuple:
     for p in file_paths:
         base = os.path.basename(p)
         if not re.match(r"^\d+\.png$", base, re.IGNORECASE):
-            return False, t("add_pet_validation_sprites_continuous")
+            return False, t("add_assistant_validation_sprites_continuous")
         num = int(re.match(r"^(\d+)", base).group(1))
         if num < 1 or num > MAX_SPRITES_PER_STATE:
-            return False, t("add_pet_validation_sprites_max")
+            return False, t("add_assistant_validation_sprites_max")
         numbers.append((num, p))
     numbers.sort(key=lambda x: x[0])
     nums_only = [n for n, _ in numbers]
     if nums_only[0] != 1:
-        return False, t("add_pet_validation_sprites_continuous")
+        return False, t("add_assistant_validation_sprites_continuous")
     expected = list(range(1, len(nums_only) + 1))
     if nums_only != expected:
-        return False, t("add_pet_validation_sprites_continuous")
+        return False, t("add_assistant_validation_sprites_continuous")
     return True, ""
 
 
@@ -190,31 +190,31 @@ class AddAssistantDialog(QDialog):
 
         form = QFormLayout()
         self.folder_edit = QLineEdit()
-        self.folder_edit.setPlaceholderText(t("add_pet_folder_placeholder"))
-        self.folder_edit.setToolTip(t("add_pet_folder_tooltip"))
+        self.folder_edit.setPlaceholderText(t("add_assistant_folder_placeholder"))
+        self.folder_edit.setToolTip(t("add_assistant_folder_tooltip"))
         self.folder_edit.textChanged.connect(self._on_folder_changed)
-        form.addRow(t("add_pet_folder_label"), self.folder_edit)
+        form.addRow(t("add_assistant_folder_label"), self.folder_edit)
 
         self.name_edit = QLineEdit()
-        self.name_edit.setPlaceholderText(t("add_pet_name_placeholder"))
-        self.name_edit.setToolTip(t("add_pet_folder_tooltip"))
-        form.addRow(t("add_pet_name_label"), self.name_edit)
+        self.name_edit.setPlaceholderText(t("add_assistant_name_placeholder"))
+        self.name_edit.setToolTip(t("add_assistant_folder_tooltip"))
+        form.addRow(t("add_assistant_name_label"), self.name_edit)
 
         self.bot_id_label = QLabel("")
         self.bot_id_label.setStyleSheet("color: #6b7280;")
-        form.addRow(t("add_pet_bot_id_label"), self.bot_id_label)
+        form.addRow(t("add_assistant_bot_id_label"), self.bot_id_label)
 
         self.desc_edit = QTextEdit()
-        self.desc_edit.setPlaceholderText(t("add_pet_description_placeholder"))
+        self.desc_edit.setPlaceholderText(t("add_assistant_description_placeholder"))
         self.desc_edit.setMaximumHeight(80)
-        form.addRow(t("add_pet_description_label"), self.desc_edit)
+        form.addRow(t("add_assistant_description_label"), self.desc_edit)
 
         layout.addLayout(form)
         self._update_bot_id_preview()
 
-        g_sprites = QGroupBox(t("add_pet_sprites_card"))
+        g_sprites = QGroupBox(t("add_assistant_sprites_card"))
         sprites_layout = QVBoxLayout(g_sprites)
-        hint = QLabel(t("add_pet_sprites_hint"))
+        hint = QLabel(t("add_assistant_sprites_hint"))
         hint.setStyleSheet("color: #6b7280; font-size: 12px;")
         hint.setWordWrap(True)
         sprites_layout.addWidget(hint)
@@ -227,12 +227,12 @@ class AddAssistantDialog(QDialog):
             lbl = QLabel(t(i18n_key) + " (" + folder_name + "):")
             lbl.setMinimumWidth(120)
             row.addWidget(lbl)
-            btn = QPushButton(t("add_pet_select_images"))
+            btn = QPushButton(t("add_assistant_select_images"))
             btn.setStyleSheet(_secondary_btn())
             btn.setCursor(Qt.PointingHandCursor)
             btn.clicked.connect(lambda checked=False, s=state_key: self._on_select_sprites(s))
             row.addWidget(btn)
-            count_lbl = QLabel(t("add_pet_selected_fmt") % 0)
+            count_lbl = QLabel(t("add_assistant_selected_fmt") % 0)
             count_lbl.setStyleSheet("color: #6b7280;")
             row.addWidget(count_lbl)
             row.addStretch()
@@ -245,7 +245,7 @@ class AddAssistantDialog(QDialog):
 
         btns = QHBoxLayout()
         btns.addStretch()
-        self.ok_btn = QPushButton(t("add_pet_ok"))
+        self.ok_btn = QPushButton(t("add_assistant_ok"))
         self.ok_btn.setStyleSheet(_primary_btn())
         self.ok_btn.setCursor(Qt.PointingHandCursor)
         self.ok_btn.clicked.connect(self._on_ok)
@@ -266,7 +266,7 @@ class AddAssistantDialog(QDialog):
     def _on_select_sprites(self, state_key: str):
         paths, _ = QFileDialog.getOpenFileNames(
             self,
-            t("add_pet_select_images") + " - " + DEFAULT_STATE_TO_SPRITE_FOLDER.get(state_key, state_key),
+            t("add_assistant_select_images") + " - " + DEFAULT_STATE_TO_SPRITE_FOLDER.get(state_key, state_key),
             "",
             "PNG (*.png)",
         )
@@ -283,22 +283,22 @@ class AddAssistantDialog(QDialog):
             numbers.append((num, p))
         numbers.sort(key=lambda x: x[0])
         self._state_files[state_key] = [(p, "%d.png" % n) for n, p in numbers]
-        self._sprite_labels[state_key].setText(t("add_pet_selected_fmt") % len(self._state_files[state_key]))
+        self._sprite_labels[state_key].setText(t("add_assistant_selected_fmt") % len(self._state_files[state_key]))
 
     def _validate_form(self) -> str:
         folder = (self.folder_edit.text() or "").strip()
         if not folder:
-            return t("add_pet_validation_folder_empty")
+            return t("add_assistant_validation_folder_empty")
         if not _validate_english_first_no_chinese(folder):
-            return t("add_pet_validation_folder_no_chinese")
+            return t("add_assistant_validation_folder_no_chinese")
         name = (self.name_edit.text() or "").strip()
         if not name:
-            return t("add_pet_validation_name_empty")
+            return t("add_assistant_validation_name_empty")
         if not _validate_english_first_no_chinese(name):
-            return t("add_pet_validation_name_no_chinese")
+            return t("add_assistant_validation_name_no_chinese")
         assistant_path = os.path.join(self.assistants_dir, folder)
         if os.path.isdir(assistant_path) and os.path.isfile(os.path.join(assistant_path, "data.json")):
-            return t("add_pet_validation_folder_exists")
+            return t("add_assistant_validation_folder_exists")
         return ""
 
     def _on_ok(self):
@@ -354,8 +354,8 @@ class AddAssistantDialog(QDialog):
                 json.dump(data, f, indent=2, ensure_ascii=False)
             consume_next_bot_id(self.assistants_dir)
             logger.info(f"添加助手成功: {folder}, bot_id={bot_id}")
-            QMessageBox.information(self, t("done_title"), t("add_pet_success"))
+            QMessageBox.information(self, t("done_title"), t("add_assistant_success"))
             self.accept()
         except Exception as e:
             logger.exception(f"添加助手失败: {e}")
-            QMessageBox.warning(self, t("add_pet_failed"), str(e))
+            QMessageBox.warning(self, t("add_assistant_failed"), str(e))

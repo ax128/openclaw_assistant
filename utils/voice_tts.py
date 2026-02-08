@@ -26,7 +26,7 @@ def _play_mp3_win(path: str) -> bool:
     try:
         import ctypes
         winmm = ctypes.windll.winmm
-        alias = "pet_voice_" + str(time.time_ns() % 1000000)
+        alias = "assistant_voice_" + str(time.time_ns() % 1000000)
         path_n = os.path.normpath(os.path.abspath(path))
         path_esc = path_n.replace("\\", "\\\\")
         winmm.mciSendStringW("close " + alias, None, 0, None)

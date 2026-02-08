@@ -33,7 +33,7 @@ logger.exception("异常信息（带堆栈）")
 
 ### 日志文件位置
 
-日志文件保存在 `logs/` 目录下，文件名格式：`pet_YYYYMMDD.log`
+日志文件保存在 `logs/` 目录下，文件名格式：`assistant_YYYYMMDD.log`
 
 ### 日志级别说明
 

@@ -232,7 +232,7 @@ def send_sessions_delete(
     """
     向服务端请求 sessions.delete（删除指定会话）。
     用途：用户在会话管理中点击删除选中会话时调用。
-    参数：session_key 即会话 key（如 agent:main:claw_pet）；服务端禁止删除 main 会话。
+    参数：session_key 即会话 key（如 agent:main:claw_assistant）；服务端禁止删除 main 会话。
     回调：callback(ok, payload, error)；ok 时 payload 含 deleted: bool。
     """
     if not client or not getattr(client, "call", None):
